@@ -15,6 +15,16 @@
 
 ---
 
+## Personal Contribution 
+
+Foliowise was built using AI-assisted development (Claude). I designed the
+product, defined the architecture, and directed implementation through detailed
+prompting and iteration. All feature decisions, debugging, deployment, and
+integration work were hands-on. The codebase reflects my understanding of
+full-stack development with FastAPI, Angular, and PostgreSQL.
+
+---
+
 ## Overview
 
 Foliowise is a comprehensive investment portfolio tracker that combines real-time market data, AI-powered insights, sentiment analysis, and gamified virtual trading competitions. Built for modern investors who want more than just tracking—they want intelligence.

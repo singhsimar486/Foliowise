@@ -15,7 +15,6 @@ from app.routers.auth import get_current_user
 from app.config import settings
 from app.services.limits import get_usage_summary, get_user_limits
 
-# Try to import stripe, but don't fail if not installed
 try:
     import stripe
     STRIPE_AVAILABLE = True
