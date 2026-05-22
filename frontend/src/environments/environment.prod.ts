@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://foliowise-api.onrender.com'
+  apiUrl: 'https://smartfolio-api.onrender.com'
 };
