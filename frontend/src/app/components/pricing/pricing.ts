@@ -115,7 +115,7 @@ export class Pricing {
     },
     {
       question: 'Is my financial data secure?',
-      answer: 'Yes, we use bank-level encryption (AES-256) and never store your brokerage credentials. Your data is yours and we never sell it.'
+      answer: 'This is currently a demo project. In a production version, we would implement bank-level encryption (AES-256) and never store your brokerage credentials. Your data is yours and we never sell it.-'
     },
     {
       question: 'Do you offer refunds?',
