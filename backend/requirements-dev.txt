@@ -1,0 +1,6 @@
+# Test-only dependencies. Kept separate from requirements.txt so the production
+# image and the Render build do not install a test runner they never use.
+-r requirements.txt
+pytest>=8.0.0
+pytest-cov>=5.0.0
+httpx>=0.24.0

@@ -1,2 +1,9 @@
 node_modules/
 .claude/
+
+# Local test and build artifacts
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+__pycache__/
