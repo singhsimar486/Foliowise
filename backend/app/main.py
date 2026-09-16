@@ -11,45 +11,51 @@ from app import models  # Import all models to register them
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create all database tables on startup
-    Base.metadata.create_all(bind=engine)
+    # Wrapped in try/except so the app can start even without a database
+    # (useful for health checks in CI/CD pipelines)
+    try:
+        Base.metadata.create_all(bind=engine)
 
-    # Add realized_gains column if it doesn't exist (migration)
-    from sqlalchemy import text, inspect
-    inspector = inspect(engine)
-    columns = [col['name'] for col in inspector.get_columns('holdings')]
-    if 'realized_gains' not in columns:
-        with engine.connect() as conn:
-            conn.execute(text('ALTER TABLE holdings ADD COLUMN realized_gains FLOAT DEFAULT 0.0'))
-            conn.commit()
+        # Add realized_gains column if it doesn't exist (migration)
+        from sqlalchemy import text, inspect
+        inspector = inspect(engine)
+        columns = [col['name'] for col in inspector.get_columns('holdings')]
+        if 'realized_gains' not in columns:
+            with engine.connect() as conn:
+                conn.execute(text('ALTER TABLE holdings ADD COLUMN realized_gains FLOAT DEFAULT 0.0'))
+                conn.commit()
 
-    # Add subscription columns to users table (migration)
-    user_columns = [col['name'] for col in inspector.get_columns('users')]
-    migrations = []
-    if 'subscription_tier' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN subscription_tier VARCHAR(20) DEFAULT 'free'")
-    if 'stripe_customer_id' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255)")
-    if 'stripe_subscription_id' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN stripe_subscription_id VARCHAR(255)")
-    if 'subscription_status' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN subscription_status VARCHAR(20) DEFAULT 'active'")
-    if 'subscription_ends_at' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN subscription_ends_at TIMESTAMP")
-    if 'referral_code' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) UNIQUE")
-    if 'referred_by' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN referred_by VARCHAR(36)")
-    if 'referral_count' not in user_columns:
-        migrations.append("ALTER TABLE users ADD COLUMN referral_count INTEGER DEFAULT 0")
+        # Add subscription columns to users table (migration)
+        user_columns = [col['name'] for col in inspector.get_columns('users')]
+        migrations = []
+        if 'subscription_tier' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN subscription_tier VARCHAR(20) DEFAULT 'free'")
+        if 'stripe_customer_id' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255)")
+        if 'stripe_subscription_id' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN stripe_subscription_id VARCHAR(255)")
+        if 'subscription_status' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN subscription_status VARCHAR(20) DEFAULT 'active'")
+        if 'subscription_ends_at' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN subscription_ends_at TIMESTAMP")
+        if 'referral_code' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) UNIQUE")
+        if 'referred_by' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN referred_by VARCHAR(36)")
+        if 'referral_count' not in user_columns:
+            migrations.append("ALTER TABLE users ADD COLUMN referral_count INTEGER DEFAULT 0")
 
-    if migrations:
-        with engine.connect() as conn:
-            for migration in migrations:
-                try:
-                    conn.execute(text(migration))
-                except Exception:
-                    pass  # Column might already exist
-            conn.commit()
+        if migrations:
+            with engine.connect() as conn:
+                for migration in migrations:
+                    try:
+                        conn.execute(text(migration))
+                    except Exception:
+                        pass  # Column might already exist
+                conn.commit()
+    except Exception as e:
+        import logging
+        logging.warning(f"Database not available on startup: {e}")
 
     yield
 
